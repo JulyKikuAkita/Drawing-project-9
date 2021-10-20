@@ -21,17 +21,18 @@ struct ContentView: View {
 
     var body: some View {
         VStack {
-            Flower(petalOffset: petalOffset, petalWidth: petalWidth)
-//                .stroke(Color.orange, lineWidth: 10)
-                .fill(Color.orange, style: FillStyle(eoFill: true)) // even-odd fill
+            Text("Style 1")
+                 .frame(width: 200, height: 200)
+                 .border(ImagePaint(image: Image("myFutureNoodles"), scale: 0.2), width: 30)
 
-            Text("Offset")
-            Slider(value: $petalOffset, in: -40...40)
-                .padding([.horizontal, .bottom])
+            Text("Hello World")
+                .frame(width: 200, height: 200)
+                .border(ImagePaint(image: Image("myFutureNoodles"), sourceRect: CGRect(x: 0, y: 0.25, width: 1, height: 0.5), scale: 0.1), width: 30)
 
-            Text("Width")
-            Slider(value: $petalWidth, in: 0...100)
-                .padding(.horizontal)
+           Capsule()
+                .strokeBorder(ImagePaint(image: Image("myFutureNoodles"), scale: 0.1), lineWidth: 20)
+                .frame(width: 300, height: 200)
+
         }
     }
 }

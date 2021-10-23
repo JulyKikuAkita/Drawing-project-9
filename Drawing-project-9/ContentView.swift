@@ -7,50 +7,82 @@
 
 import SwiftUI
 
+/**
+ 1. Create an Arrow shape made from a rectangle and a triangle – having it point straight up is fine.
+ 2. Make the line thickness of your Arrow shape animatable.
+ 3. Create a ColorCyclingRectangle shape that is the rectangular cousin of ColorCyclingCircle, allowing us to control the position of the gradient using a property.
+ */
 struct ContentView: View {
-    @State private var amount: CGFloat = 0.0
-
+    @State private var colorCycle = 0.0
+    var points:[(point: UnitPoint, name: String)] = [
+        (.top, "top"),
+        (.bottom, "bottom"),
+        (.center, "center"),
+        (.topLeading,"topLeading"),
+        (.topTrailing,"topTrailing"),
+        (.bottomTrailing,"bottomTrailing"),
+        (.bottomLeading, "bottomLeading"),
+        (.leading, "leading")
+    ]
+    @State private var startPoint: UnitPoint = .top
+    @State private var endPoint: UnitPoint = .bottom
 
     var body: some View {
         VStack {
-            ZStack {
-                // demo blend effect
-                Circle()
-                    .fill(Color(red: 1, green: 0, blue: 0))
-                    .frame(width: 200 * amount)
-                    .offset(x: -50, y: -80)
-                    .blendMode(.screen)
-
-                Circle()
-                    .fill(Color(red: 0, green: 1, blue: 0))
-                    .frame(width: 200 * amount)
-                    .offset(x: 50, y: -80)
-                    .blendMode(.screen)
-
-                Circle()
-                    .fill(Color(red: 0, green: 0, blue: 1))
-                    .frame(width: 200 * amount)
-                    .blendMode(.screen)
-            }
-            .frame(width: 300, height: 300)
-
-            Slider(value: $amount)
+            ColorCyclingRectangle(amount: self.colorCycle, startPoint: startPoint, endPoint: endPoint)
+                .frame(width: 300, height: 300)
                 .padding()
 
-            // demo blur effect
-            Image("myFutureNoodles")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 200, height: 200)
-                .saturation(Double(amount))
-                .blur(radius: (1 - amount) * 20)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.black)
-        .edgesIgnoringSafeArea(.all)
+            Text("Choose Color")
+            Slider(value: $colorCycle)
+                .padding()
 
+            Text("Choose Gradient start point")
+            Picker(selection: $startPoint, label: Text("Gradient start point")) {
+                ForEach(points, id: \.self.name) {
+                    Text("\($0.name)")
+                }
+            }
+
+            Text("Choose Gradient end point")
+            Picker(selection: $endPoint, label: Text("Gradient end point")) {
+                ForEach(points, id: \.1) {
+                    Text("\($0.name)")
+                }
+            }
+        }
     }
 
+}
+
+struct ColorCyclingRectangle: View {
+    var amount = 0.0
+    var steps = 100
+    var startPoint: UnitPoint = .top
+    var endPoint: UnitPoint = .bottom
+
+    var body: some View {
+        ZStack {
+            ForEach(0..<steps) { value in
+                Rectangle()
+                    .inset(by: CGFloat(value))
+                    .strokeBorder(LinearGradient(gradient: Gradient(colors: [
+                        self.color(for: value, brightness: 1),
+                        self.color(for: value, brightness: 0.3)
+                    ]), startPoint: self.startPoint, endPoint: self.endPoint), lineWidth: 50)
+            }
+        }
+        .drawingGroup()
+    }
+
+    func color(for value: Int, brightness: Double) -> Color {
+        var targetHue = Double(value) / Double(self.steps) + self.amount
+        if targetHue > 1 {
+            targetHue -= 1
+        }
+
+        return Color(hue: targetHue, saturation: 1, brightness: brightness)
+    }
 }
 
 struct ContentView_Previews: PreviewProvider {

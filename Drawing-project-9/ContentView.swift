@@ -10,6 +10,7 @@ import SwiftUI
 /**
  1. Create an Arrow shape made from a rectangle and a triangle – having it point straight up is fine.
  2. Make the line thickness of your Arrow shape animatable.
+ https://www.hackingwithswift.com/books/ios-swiftui/animating-bindings
  3. Create a ColorCyclingRectangle shape that is the rectangular cousin of ColorCyclingCircle, allowing us to control the position of the gradient using a property.
  */
 struct ContentView: View {
@@ -27,10 +28,23 @@ struct ContentView: View {
     @State private var startPoint: UnitPoint = .top
     @State private var endPoint: UnitPoint = .bottom
 
+    @State private var arrowLineWidth = 25.0
+
     var body: some View {
         VStack {
+            Arrow(insetAmount: arrowLineWidth)
+                .rotation(.degrees(90))
+                .stroke(Color.orange, style: StrokeStyle(lineWidth: 5, lineCap: .round, lineJoin: .round))
+                .frame(width: 100, height: 100)
+
+            // animate binding
+            Slider(value: $arrowLineWidth.animation(
+                Animation.easeInOut(duration: 5)
+            ), in: 1...50)
+                .padding()
+
             ColorCyclingRectangle(amount: self.colorCycle, startPoint: startPoint, endPoint: endPoint)
-                .frame(width: 300, height: 300)
+                .frame(width: 100, height: 70)
                 .padding()
 
             Text("Choose Color")
@@ -53,6 +67,27 @@ struct ContentView: View {
         }
     }
 
+}
+
+struct Arrow: Shape {
+    var insetAmount: CGFloat
+    var animatableData: CGFloat {
+        get { insetAmount }
+        set { self.insetAmount = newValue }
+    }
+
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+
+        path.move(to: CGPoint(x: rect.midX, y: rect.minY - rect.height / 2))
+        path.addLine(to: CGPoint(x: rect.minX - rect.width / 2 - insetAmount, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.maxX + rect.width / 2 + insetAmount, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.midX, y: rect.minY - rect.height / 2))
+
+        path.addRect(rect)
+
+        return path
+    }
 }
 
 struct ColorCyclingRectangle: View {
